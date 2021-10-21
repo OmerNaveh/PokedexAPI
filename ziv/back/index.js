@@ -3,6 +3,7 @@ const app = express();
 const port = 3000; //developer Port
 const Pokedex = require('pokedex-promise-v2');
 const P = new Pokedex();
+const pokemonRouter =require('./routers/pokemonRouter')
 //P.getPokemonByName//info about pokemon
 //P.getTypeByName //get data about specific type
 // start the server
@@ -11,9 +12,10 @@ app.listen(port, function() {
 });
 
 // route our app
-app.get('/', function(req, res) {
-  P.getPokemonByName('1')
-  .then(function (result){
-  res.send({'name': result.name , 'height':result.height, 'weight':result.weight, 'types':result.types, 'sprites': result.sprites, 'abilities':result.abilities})
-})
-});
+app.use('/pokemon',pokemonRouter);
+// app.get('/', function(req, res) {
+//   P.getPokemonByName('1')
+//   .then(function (result){
+//   res.send({'name': result.name , 'height':result.height, 'weight':result.weight, 'types':result.types,'species':result.species , 'front_pic':result.sprites['front_default'],'back_pic': result.sprites['back_default'], 'abilities':result.abilities})
+// })
+// });
