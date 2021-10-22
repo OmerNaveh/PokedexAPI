@@ -4,8 +4,7 @@ const port = 3000; //developer Port
 const Pokedex = require('pokedex-promise-v2');
 const P = new Pokedex();
 const pokemonRouter =require('./routers/pokemonRouter')
-//P.getPokemonByName//info about pokemon
-//P.getTypeByName //get data about specific type
+
 // start the server
 app.listen(port, function() {
   console.log('app started');
