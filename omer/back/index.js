@@ -4,8 +4,6 @@ const P = new Pokedex()
 const app = express();
 const port = 3000; //Because Iron-Man
 const pokemonRouter = require("./routers/pokemonRouter")
-app.use(express.json())
-app.use(express.urlencoded({ extended: true}));
 
 // start the server
 app.listen(port, function() {
