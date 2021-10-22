@@ -31,7 +31,7 @@ router.put('/catch/:id', (request,response)=>{ //put request --catching pokemon
     const body=request.body;
     if(fs.existsSync(`./users/${id}`)){
         if(fs.existsSync(`./users/${id}/${body.pokemon.id}.json`)){
-            response.status(403).send('Pokemon already caught')
+           return response.status(403).send('Pokemon already caught')
         }
         fs.writeFileSync(`./users/${id}/${body.pokemon.id}.json`,JSON.stringify(body.pokemon)) //make pokemon json file
     }
@@ -42,5 +42,16 @@ router.put('/catch/:id', (request,response)=>{ //put request --catching pokemon
     response.send('pokemon caught')
 }
 )
-
+router.delete('/release/:id', (request,response)=>{
+    const id= request.params.id;
+    const body = request.body;
+    if(fs.existsSync(`./users/${id}`)){
+        if(!fs.existsSync(`./users/${id}/${body.pokemon.id}.json`)){}
+        else{
+            fs.unlinkSync(`./users/${id}/${body.pokemon.id}.json`)
+            return response.send('Pokemon was released to the wild!')
+        }
+    }
+    response.status(403).send("Pokemon has'nt been caught yet")
+})
   module.exports = router
