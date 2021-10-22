@@ -1,8 +1,11 @@
+const fs = require('fs')
 const express = require('express');
 const router = express.Router();
 router.use(express.json())
 
 const Pokedex = require('pokedex-promise-v2');
+const { userInfo } = require('os');
+const { json } = require('express');
 const P = new Pokedex()
 
 router.get('/get/:id', async (request, response) => {
@@ -11,8 +14,6 @@ router.get('/get/:id', async (request, response) => {
     response.send(pokemonInfo)
 })
 router.get('/', async (request, response) => {
-    console.log(request.body)
-    // response.send("test")
     const pokemonInfo = await getPokemonInfo(request.body.name)
     response.send(pokemonInfo)
 })
@@ -29,6 +30,22 @@ async function getPokemonInfo(id){
         'back_pic': result.sprites['back_default']
     }
 }
+
+router.put('/catch/:id', async (request, response) => {
+    const username = request.params.id
+    const pokemonObj = request.body.pokemon
+    console.log(fs.existsSync(`../users/${username}`))
+    if (fs.existsSync(`./users/${username}`)) {
+        if (fs.existsSync(`./users/${username}/${pokemonObj.id}.json`)) {
+            response.status(403).send('pokemon already been caught')
+        }
+        fs.writeFileSync(`./users/${username}/${pokemonObj.id}.json`, JSON.stringify(pokemonObj))
+    } else {
+        fs.mkdirSync(`./users/${username}`) // create user dir
+        fs.writeFileSync(`./users/${username}/${pokemonObj.id}.json`, JSON.stringify(pokemonObj)) //create pokemon json
+    }
+    response.send('caught pokemon')
+})
 
 module.exports = router
 
