@@ -31,13 +31,13 @@ async function getPokemonInfo(id){
     }
 }
 
-router.put('/catch/:id', async (request, response) => {
+router.put('/catch/:id', (request, response) => {
     const username = request.params.id
     const pokemonObj = request.body.pokemon
-    console.log(fs.existsSync(`../users/${username}`))
     if (fs.existsSync(`./users/${username}`)) {
         if (fs.existsSync(`./users/${username}/${pokemonObj.id}.json`)) {
             response.status(403).send('pokemon already been caught')
+            return
         }
         fs.writeFileSync(`./users/${username}/${pokemonObj.id}.json`, JSON.stringify(pokemonObj))
     } else {
@@ -45,6 +45,20 @@ router.put('/catch/:id', async (request, response) => {
         fs.writeFileSync(`./users/${username}/${pokemonObj.id}.json`, JSON.stringify(pokemonObj)) //create pokemon json
     }
     response.send('caught pokemon')
+})
+
+router.delete('/release/:id', (request, response) => {
+    const username = request.params.id
+    const pokemonObj = request.body.pokemon
+    if (fs.existsSync(`./users/${username}`)) {
+        if (fs.existsSync(`./users/${username}/${pokemonObj.id}.json`)) {
+            fs.unlinkSync(`./users/${username}/${pokemonObj.id}.json`)
+            response.send('released pokemon')
+            return
+        }
+    }
+    response.status(403).send("pokemon hasn't been caught")
+
 })
 
 module.exports = router
