@@ -2,21 +2,31 @@ const fs = require('fs')
 const express = require('express');
 const router = express.Router();
 router.use(express.json())
-
 const Pokedex = require('pokedex-promise-v2');
-const { userInfo } = require('os');
-const { json } = require('express');
 const P = new Pokedex()
 
-router.get('/get/:id', async (request, response) => {
-    const {id} = request.params
-    const pokemonInfo = await getPokemonInfo(id)
-    response.send(pokemonInfo)
+router.get('/test', (req, res) => {
+    req.headers.username = 'test'
+    res.send(req.headers)
 })
-router.get('/', async (request, response) => {
-    const pokemonInfo = await getPokemonInfo(request.body.name)
-    response.send(pokemonInfo)
+
+router.get('/get/:id', async (request, response, next) => {
+    try {
+        const {id} = request.params
+        const pokemonInfo = await getPokemonInfo(id)
+        response.send(pokemonInfo)
+    } catch (error){
+        next(error)
+    }
 })
+// router.get('/', async (request, response, next) => {
+//     try {
+//         const pokemonInfo = await getPokemonInfo(request.body.name)
+//         response.send(pokemonInfo)
+//     } catch (error) {
+//         next(error)
+//     }
+// })
 
 async function getPokemonInfo(id){
     const result = await P.getPokemonByName(id)
@@ -31,55 +41,59 @@ async function getPokemonInfo(id){
     }
 }
 
-router.put('/catch/:id', (request, response) => {
-    const username = request.params.id
-    const pokemonObj = request.body.pokemon
-    if (fs.existsSync(`./users/${username}`)) {
-        if (fs.existsSync(`./users/${username}/${pokemonObj.id}.json`)) {
-            response.status(403).send('pokemon already been caught')
-            return
+router.put('/catch/:id', async (request, response, next) => {
+    try {
+        const {id} = request.params
+        const username = request.headers.username
+        const pokemonObj = getPokemonInfo(id)
+        if (fs.existsSync(`./users/${username}`)) {
+            if (fs.existsSync(`./users/${username}/${id}.json`)) {
+                throw {'massage': '403'}
+            }
+            fs.writeFileSync(`./users/${username}/${id}.json`, JSON.stringify(pokemonObj))
+        } else {
+            fs.mkdirSync(`./users/${username}`) // create user dir
+            fs.writeFileSync(`./users/${username}/${id}.json`, JSON.stringify(pokemonObj)) //create pokemon json
         }
-        fs.writeFileSync(`./users/${username}/${pokemonObj.id}.json`, JSON.stringify(pokemonObj))
-    } else {
-        fs.mkdirSync(`./users/${username}`) // create user dir
-        fs.writeFileSync(`./users/${username}/${pokemonObj.id}.json`, JSON.stringify(pokemonObj)) //create pokemon json
+        response.send('caught pokemon')
+    } catch (error) {
+        next(error)
     }
-    response.send('caught pokemon')
 })
 
-router.delete('/release/:id', (request, response) => {
-    const username = request.params.id
-    const pokemonObj = request.body.pokemon
-    if (fs.existsSync(`./users/${username}`)) {
-        if (fs.existsSync(`./users/${username}/${pokemonObj.id}.json`)) {
-            fs.unlinkSync(`./users/${username}/${pokemonObj.id}.json`)
-            response.send('released pokemon')
-            return
+router.delete('/release/:id', (request, response, next) => {
+    try { 
+        const {id} = request.params
+        const username = request.headers.username
+        if (fs.existsSync(`./users/${username}`)) {
+            if (fs.existsSync(`./users/${username}/${id}.json`)) {
+                fs.unlinkSync(`./users/${username}/${id}.json`)
+                response.send('released pokemon')
+                return
+            }
         }
+        throw {'massage': '403'}
+    } catch (error) {
+        next(error)
     }
-    response.status(403).send("pokemon hasn't been caught")
 })
 
-router.get('/:id', (request, response) => {
-    const username = request.params.id
-    if (fs.existsSync(`./users/${username}`)) {
-        const caughtArr = []
-        const pokeFiles = fs.readdirSync(`./users/${username}`)
-        for (const file of pokeFiles) {
-            caughtArr.push(JSON.parse(fs.readFileSync(`./users/${username}/${file}`)))
+router.get('/', (request, response, next) => {
+    try {
+        const username = request.headers.username
+        if (fs.existsSync(`./users/${username}`)) {
+            const caughtArr = []
+            const pokeFiles = fs.readdirSync(`./users/${username}`)
+            for (const file of pokeFiles) {
+                caughtArr.push(JSON.parse(fs.readFileSync(`./users/${username}/${file}`)))
+            }
+            return response.send(JSON.stringify(caughtArr))
         }
-        return response.send(JSON.stringify(caughtArr))
+        throw {'massage': '403'}
+    } catch (error) {
+        next(error)
     }
-    response.status(403).send("This user haven't caught any pokemon")
 })
+
 
 module.exports = router
-
-// {'name': result.name, 
-//                 'height':result.height, 
-//                 'weight':result.weight, 
-//                 'types':result.types, 
-//                 'abilities':result.abilities,
-//                 'front_pic':result.sprites['front_default'],
-//                 'back_pic': result.sprites['back_default']
-//             }

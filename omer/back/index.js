@@ -4,6 +4,9 @@ const P = new Pokedex()
 const app = express();
 const port = 3000; //Because Iron-Man
 const pokemonRouter = require("./routers/pokemonRouter")
+const userRouter = require('./routers/userRouter')
+const errorHandler = require('./middleware/errorHandler');
+const userHandler = require('./middleware/userHandler');
 
 // start the server
 app.listen(port, function() {
@@ -11,21 +14,7 @@ app.listen(port, function() {
 });
 
 // route our app
+app.use(userHandler)
 app.use("/pokemon", pokemonRouter)
-
-// app.get('/pokemon', function(req, res) {
-// 	P.getPokemonByName("eevee")
-// 	.then((result) => {
-// 		res.send({'name': result.name, 
-// 			'height':result.height, 
-// 			'weight':result.weight, 
-// 			'types':result.types, 
-// 			'abilities':result.abilities,
-// 			'front_pic':result.sprites['front_default'],
-// 			'back_pic': result.sprites['back_default']
-// 		})
-// 	})
-// res.end()
-// });
-
-// P.getPokemonByName("PokemonName")
+app.use('/info', userRouter)
+app.use(errorHandler)
