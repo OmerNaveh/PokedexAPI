@@ -26,6 +26,7 @@ const returnPokeData= async (id)=>{ //return needed pokemon data function
         'back_pic': result.sprites['back_default'], 
         'abilities':result.abilities}
 }
+
 router.put('/catch/:id', (request,response)=>{ //put request --catching pokemon
     const id=request.params.id;
     const body=request.body;
@@ -40,9 +41,9 @@ router.put('/catch/:id', (request,response)=>{ //put request --catching pokemon
         fs.writeFileSync(`./users/${id}/${body.pokemon.id}.json`,JSON.stringify(body.pokemon)) //make pokemon json file
         } 
     response.send('pokemon caught')
-}
-)
-router.delete('/release/:id', (request,response)=>{
+})
+
+router.delete('/release/:id', (request,response)=>{ //delete request --- release pokemon
     const id= request.params.id;
     const body = request.body;
     if(fs.existsSync(`./users/${id}`)){
@@ -53,5 +54,19 @@ router.delete('/release/:id', (request,response)=>{
         }
     }
     response.status(403).send("Pokemon has'nt been caught yet")
+})
+
+router.get('/:id', (request,response)=>{ //get request --- returns all pokemon caught by user
+    const id= request.params.id;
+    if(fs.existsSync(`./users/${id}`)){
+        const pokeFiles = fs.readdirSync(`./users/${id}`);
+        const dataArr = [];
+        for(file of pokeFiles){
+            const data = JSON.parse(fs.readFileSync(`./users/${id}/${file}`))
+            dataArr.push(data);
+        }
+        return response.send(JSON.stringify(dataArr))
+    }
+    response.status(403).send('This user does not exist')
 })
   module.exports = router
