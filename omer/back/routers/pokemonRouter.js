@@ -58,7 +58,19 @@ router.delete('/release/:id', (request, response) => {
         }
     }
     response.status(403).send("pokemon hasn't been caught")
+})
 
+router.get('/:id', (request, response) => {
+    const username = request.params.id
+    if (fs.existsSync(`./users/${username}`)) {
+        const caughtArr = []
+        const pokeFiles = fs.readdirSync(`./users/${username}`)
+        for (const file of pokeFiles) {
+            caughtArr.push(JSON.parse(fs.readFileSync(`./users/${username}/${file}`)))
+        }
+        return response.send(JSON.stringify(caughtArr))
+    }
+    response.status(403).send("This user haven't caught any pokemon")
 })
 
 module.exports = router
