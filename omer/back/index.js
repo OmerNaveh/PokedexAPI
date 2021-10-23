@@ -7,12 +7,16 @@ const pokemonRouter = require("./routers/pokemonRouter")
 const userRouter = require('./routers/userRouter')
 const errorHandler = require('./middleware/errorHandler');
 const userHandler = require('./middleware/userHandler');
+const cors = require('cors')
+
 
 // start the server
 app.listen(port, function() {
   console.log('app started');
 });
 
+
+app.use(cors()) // solves chrome issue
 // route our app
 app.use(userHandler)
 app.use("/pokemon", pokemonRouter)

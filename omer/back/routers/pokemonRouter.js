@@ -16,6 +16,7 @@ router.get('/get/:id', async (request, response, next) => {
         const pokemonInfo = await getPokemonInfo(id)
         response.send(pokemonInfo)
     } catch (error){
+        error = {'massage': "404"}
         next(error)
     }
 })
@@ -45,7 +46,7 @@ router.put('/catch/:id', async (request, response, next) => {
     try {
         const {id} = request.params
         const username = request.headers.username
-        const pokemonObj = getPokemonInfo(id)
+        const pokemonObj = await getPokemonInfo(id)
         if (fs.existsSync(`./users/${username}`)) {
             if (fs.existsSync(`./users/${username}/${id}.json`)) {
                 throw {'massage': '403'}
