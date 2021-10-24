@@ -220,7 +220,8 @@ function signInSectChange(){
         userNameInput.value = "";
         username = undefined;
         signOutBtn.replaceWith(signInBtn);
-        resetPokeList()
+        resetPokeList();
+        errorHandler('username')
     })
 }
 async function showemAll(){
