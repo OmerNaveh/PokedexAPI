@@ -2,6 +2,7 @@
 const inputById= document.getElementById('inputById');
 const searchByIdButton = document.getElementById('searchByIdButton');
 const byIdName = document.getElementById('byIdName')
+const byIdID = document.getElementById('byIdID')
 const byIdHeight = document.getElementById('byIdHeight')
 const byIdWeight = document.getElementById('byIdWeight')
 const byIdImg = document.getElementById('byIdImg')
@@ -13,6 +14,7 @@ const signInBtn = document.getElementById('signInBtn');
 const gottaCatchEmSect = document.getElementById('gottaCatchEmSect');
 const catchBtn = document.getElementById('catchBtn');
 const releaseBtn = document.getElementById('releaseBtn');
+const catchreleaseSect = document.getElementById('catchreleaseSect');
 
 let username = undefined;
 
@@ -41,6 +43,7 @@ const changeDomDescById = async (id) =>{ //changing the Dom
         else{
         const data = await getPokemonById(id);
         inputById.value = '' //reset input value
+        byIdID.innerText = data.id
         byIdName.innerText ='Name: ' + data.name;
         byIdHeight.innerText ='Height: ' + data.height;
         byIdWeight.innerText = 'Weight: ' + data.weight;
@@ -49,7 +52,7 @@ const changeDomDescById = async (id) =>{ //changing the Dom
         byIdImg.addEventListener('mouseover', (e) => changepostion(data.sprites))
         errorHandler(); //reset this label after change in case of an error
         addPokemonTypes(data.types);
-        addCatchRelease(id)
+        addCatchRelease(data.id)
         deleteDropDown();
         deleteReloadBtn();
         return }
@@ -169,6 +172,34 @@ const deleteReloadBtn = () =>{
 //general event listeners
 searchByIdButton.addEventListener('click',(e)=> changeDomDescById(inputById.value))
 signInBtn.addEventListener('click',signInSectChange)
+catchBtn.addEventListener('click', async (e)=>{
+    try {
+        const pokeId= byIdID.textContent
+        const res= await axios.put(`http://localhost:3000/pokemon/catch/${pokeId}`, 
+        {body: {}},{headers:{"username": username}}); 
+        showemAll(); 
+        clearErrMsg();  
+    } catch (error) {
+        clearErrMsg();
+        const errMsg = btnErrorMsg();
+        errMsg.textContent = 'you already have this pokemon'
+        catchreleaseSect.append(errMsg)
+    }
+})
+releaseBtn.addEventListener('click',async (e)=>{
+    try {
+        const pokeId= byIdID.textContent
+        await axios.delete(`http://localhost:3000/pokemon/release/${pokeId}`, 
+        {headers:{"username": username}},{body: {}});
+        showemAll()
+        clearErrMsg()
+    }catch (error) {
+        clearErrMsg()
+        const errMsg = btnErrorMsg();
+        errMsg.textContent = 'you dont have this pokemon'
+        catchreleaseSect.append(errMsg)
+    }
+})
 
 //sign in functions
 
@@ -216,27 +247,25 @@ function addpokemontosect(name){
 function resetPokeList(){
     const pokeli = document.getElementsByClassName('pokeList');
     for(let pokemon of pokeli){
-        pokemon.remove();
+        if(pokeli.length>0){
+            pokemon.remove();
+            resetPokeList(); //recursion because without it the first pokemon always remains
+            }  
     }
 }
 
-function addCatchRelease(pokeId){
-    catchBtn.addEventListener('click', async (e)=>{
-        try {
-            const res= await axios.put(`http://localhost:3000/pokemon/catch/${pokeId}`, 
-            {headers:{"username": username}}); 
-            showemAll();   
-        } catch (error) {
-            alert('you already have this pokemon')
-        }
-    })
-    releaseBtn.addEventListener('click',async (e)=>{
-        try {
-            await axios.delete(`http://localhost:3000/pokemon/release/${pokeId}`, 
-            {headers:{"username": username}});
-            showemAll()
-        }catch (error) {
-            alert('you dont have this pokemon')
-        }
-    })
+function btnErrorMsg(){
+    const label = document.createElement('label');
+    label.classList.add('errorMsg');
+    return label;
 }
+function clearErrMsg(){
+    const errMsg = document.getElementsByClassName('errorMsg');
+    for(let msg of errMsg){
+        if(errMsg.length>0){
+            msg.remove();
+            resetPokeList(); //recursion
+            }  
+    }
+}
+

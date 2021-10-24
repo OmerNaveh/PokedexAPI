@@ -32,6 +32,7 @@ router.get('/get/:id', async (request, response, next) => {
 async function getPokemonInfo(id){
     const result = await P.getPokemonByName(id)
     return {
+        'id' : result.id,
         'name': result.name, 
         'height':result.height, 
         'weight':result.weight, 
@@ -69,8 +70,7 @@ router.delete('/release/:id', (request, response, next) => {
         if (fs.existsSync(`./users/${username}`)) {
             if (fs.existsSync(`./users/${username}/${id}.json`)) {
                 fs.unlinkSync(`./users/${username}/${id}.json`)
-                response.send('released pokemon')
-                return
+                return response.send('released pokemon')
             }
         }
         throw {'massage': '403'}

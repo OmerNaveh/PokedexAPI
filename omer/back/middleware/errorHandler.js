@@ -1,12 +1,13 @@
 function errorHandler(err, req, res, next) {
     if (err.massage) {
-        if (err.massage == '404') {
+        err.massage = `${err.massage}`
+        if (err.massage.includes('404')) {
             res.status(404).send('Pokemon not found!')
         }
-        if (err.massage == '403') {
+        if (err.massage.includes('403')) {
             res.status(403).send('Releasing an uncaught pokemon, or catching an already caught pokemon')
         }
-        if(err.message == '401'){
+        if(err.massage.includes('401')){
             res.status(401).send('unauthenticated user request')
         }
     } else {

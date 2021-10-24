@@ -82,3 +82,11 @@ body{
 .catchRelease{
     width: 200px;
 }
+.errorMsg{
+    position: absolute;
+    color: whitesmoke;
+    background-color: darkred;
+    border: solid 1px black;
+    top: 150px;
+    right: 470px;
+}
