@@ -2,6 +2,7 @@
 
 function errorhandler(err,req,res,next){
     if(err.message){
+        err.message = `${err.message}`
         if(err.message.includes('404')){
             res.status(404).send('pokemon not found!')
         }

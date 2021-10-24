@@ -164,7 +164,7 @@ tbody td{
 }
 
 /* error */
-#error{
+.error{
     position: absolute;
     width: 50%;
     height: 40%;

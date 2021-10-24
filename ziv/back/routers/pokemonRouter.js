@@ -26,13 +26,17 @@ router.get('/get/:id', async function(request, response, next) { //get request b
 const returnPokeData= async (id)=>{ //return needed pokemon data function    
     const result = await P.getPokemonByName(id);
     return {
+        'id': result.id,
         'name': result.name ,
         'height':result.height, 
         'weight':result.weight, 
-        'types':result.types,'species':result.species , 
+        'types':result.types,
+        'species':result.species , 
         'front_pic':result.sprites['front_default'],
         'back_pic': result.sprites['back_default'], 
-        'abilities':result.abilities}
+        'abilities':result.abilities,
+        'stats': result.stats
+    }
 }
 
 router.put('/catch/:id', async (request,response,next)=>{ //put request --catching pokemon
