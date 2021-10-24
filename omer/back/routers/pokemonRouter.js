@@ -16,6 +16,7 @@ router.get('/get/:id', async (request, response, next) => {
         const pokemonInfo = await getPokemonInfo(id)
         response.send(pokemonInfo)
     } catch (error){
+        error = {'massage': "404"}
         next(error)
     }
 })
@@ -31,6 +32,7 @@ router.get('/get/:id', async (request, response, next) => {
 async function getPokemonInfo(id){
     const result = await P.getPokemonByName(id)
     return {
+        'id' : result.id,
         'name': result.name, 
         'height':result.height, 
         'weight':result.weight, 
@@ -45,7 +47,7 @@ router.put('/catch/:id', async (request, response, next) => {
     try {
         const {id} = request.params
         const username = request.headers.username
-        const pokemonObj = getPokemonInfo(id)
+        const pokemonObj = await getPokemonInfo(id)
         if (fs.existsSync(`./users/${username}`)) {
             if (fs.existsSync(`./users/${username}/${id}.json`)) {
                 throw {'massage': '403'}
@@ -68,8 +70,7 @@ router.delete('/release/:id', (request, response, next) => {
         if (fs.existsSync(`./users/${username}`)) {
             if (fs.existsSync(`./users/${username}/${id}.json`)) {
                 fs.unlinkSync(`./users/${username}/${id}.json`)
-                response.send('released pokemon')
-                return
+                return response.send('released pokemon')
             }
         }
         throw {'massage': '403'}

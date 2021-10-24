@@ -3,8 +3,8 @@ const router = express.Router();
 router.use(express.json());
 
 router.post('/',(request,response)=>{
-    const body= request.body;
-    return response.send(body.username)
+    const username= request.headers;
+    return response.send(username.username)
 })
 
 
