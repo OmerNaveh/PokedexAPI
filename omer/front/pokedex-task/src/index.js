@@ -223,7 +223,7 @@ function resetPokeList(){
 function addCatchRelease(pokeId){
     catchBtn.addEventListener('click', async (e)=>{
         try {
-            await axios.put(`http://localhost:3000/pokemon/catch/${pokeId}`, 
+            const res= await axios.put(`http://localhost:3000/pokemon/catch/${pokeId}`, 
             {headers:{"username": username}}); 
             showemAll();   
         } catch (error) {
@@ -235,7 +235,7 @@ function addCatchRelease(pokeId){
             await axios.delete(`http://localhost:3000/pokemon/release/${pokeId}`, 
             {headers:{"username": username}});
             showemAll()
-        } catch (error) {
+        }catch (error) {
             alert('you dont have this pokemon')
         }
     })
