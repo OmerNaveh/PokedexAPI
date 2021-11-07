@@ -1,6 +1,10 @@
 //Inputs
 const searchBox = document.getElementById("search-box")
 const searchButton = document.getElementById("search-button")
+const loginInput = document.getElementById("user-login")
+const loginButton = document.getElementById("login-button")
+const catchButton = document.getElementById("catch")
+const releaseButton = document.getElementById("release")
 // Outputs
 const spriteElem = document.getElementById("pokemon-sprite")
 const idElem = document.getElementById("pokemon-id")
@@ -12,10 +16,13 @@ const heightElem = document.getElementById("pokemon-height")
 const weightElem = document.getElementById("pokemon-weight")
 const specialtyElem = document.getElementById("pokemon-specialty")
 const descriptionElem = document.getElementById("pokemon-description")
+const caughtListElem = document.getElementById("caught-list")
+// username
+let username
 
 async function getPokemon(pokemonId){
     try{
-        const pokemonPromise = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/`)
+        const pokemonPromise = await axios.get(`http://localhost:8080/pokemon/get/${pokemonId}`,{headers:{"username": username}});
         return pokemonPromise.data
     } catch (error){
         handleError()
@@ -56,8 +63,8 @@ async function getAllPokemonOfType(typeURL){
 async function displayPokemon(pokemonId){
     try{
         const pokemonData = await getPokemon(pokemonId)
-        spriteElem.src = pokemonData.sprites.front_default
-        backSprite(pokemonData.sprites.front_default, pokemonData.sprites.back_default)
+        spriteElem.src = pokemonData.front_pic
+        backSprite(pokemonData.front_pic, pokemonData.back_pic)
         idElem.innerText = pokemonData.id
         nameElem.innerText = pokemonData.name
         renderElem.src = `https://img.pokemondb.net/sprites/home/normal/${pokemonData.name}.png`
@@ -69,7 +76,7 @@ async function displayPokemon(pokemonId){
         displayDescription(pokemonData.species.url)
         // console.log(pokemonData)
     } catch (error){
-        throw `can't find Pokemon. ${error}`
+        // throw `can't find Pokemon. ${error}`
     }
 }
 
@@ -90,7 +97,8 @@ function displayTypes(types){
 // type select functionality
 function createTypeImg(type, typeCount){
     const typeIcon = document.createElement("img")
-    typeIcon.src = `/Pokedex/styles/images/types/${type.type.name}.png`
+    // typeIcon.src = `/Pokedex/styles/images/types/${type.type.name}.png` //GitHub pages format
+    typeIcon.src = `./styles/images/types/${type.type.name}.png` //localhost format
     typeIcon.classList.add("type-box", `type-icon${typeCount}`)
     typeIcon.addEventListener("click", showTypeSelect)
     typeElem.appendChild(typeIcon)
@@ -141,14 +149,14 @@ searchButton.addEventListener("click", ()=>{searchPokemon(searchBox.value)})
 // Error handles
 function handleError(){
     const errorElem = document.createElement("div")
-    errorElem.id = "error"
+    errorElem.classList.add = "error"
     errorElem.innerText = `Error! can't find Pokemon`
     document.body.appendChild(errorElem)
 }
 function removeError(){
-    const checkPrevError = document.getElementById("error")
-    if (checkPrevError !== null){
-        document.body.removeChild(checkPrevError)
+    const checkPrevError = document.getElementsByClassName("error")
+    if (checkPrevError.length !== 0){
+        document.body.removeChild(checkPrevError[0])
     }
 }
 // Speciality calculates the pokemon's speciality and returns it.
@@ -188,8 +196,59 @@ function identifyEnglishDescription(descriptionArr){
         if (description.language.name === "en") return description.flavor_text
     }
 }
-// // If I have time do sothing about pokemon gender
 
+// Log-in
+function login() {
+    username = loginInput.value
+    displayCaughtList()
+    removeError()
+}
+loginButton.addEventListener("click", login)
 
+async function catchPokemon() {
+    try{
+        const pokemonId = idElem.innerText
+        const catchRequest = await axios.put(`http://localhost:8080/pokemon/catch/${pokemonId}`, {body:{}}, {headers:{"username": username}});
+        displayCaughtList()
+        return catchRequest
+    } catch (error){
+        handleError()
+        throw error
+    }
+}
+catchButton.addEventListener("click", catchPokemon)
+
+async function releasePokemon() {
+    try{
+        const pokemonId = idElem.innerText
+        axios.delete(`http://localhost:8080/pokemon/release/${pokemonId}`,{headers:{"username": username}}, {body:{}});
+        displayCaughtList()
+        return 
+    } catch (error){
+        handleError()
+        throw error
+    }
+}
+releaseButton.addEventListener("click", releasePokemon)
+
+async function getCaughtList() {
+    try{
+        const caughtlist = await axios.get(`http://localhost:8080/pokemon/`,{headers:{"username": username}});
+        console.log(caughtlist.data)
+        return caughtlist.data
+    } catch (error){
+        handleError()
+        throw error
+    }
+}
+
+async function displayCaughtList() {
+    const pokemonList = await getCaughtList()
+    const caughtArr = []
+    for (const pokemon of pokemonList) {
+        caughtArr.push(` ${pokemon.name}`)
+    }
+    caughtListElem.innerText = caughtArr
+}
 
 // displayPokemon(280)
